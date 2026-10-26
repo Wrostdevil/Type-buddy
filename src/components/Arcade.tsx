@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { Invaders } from './arcade/Invaders'
 import { Tracer } from './arcade/Tracer'
 import { Reaction } from './arcade/Reaction'
@@ -7,8 +7,10 @@ import { GhostChase } from './arcade/GhostChase'
 import { Brawler } from './arcade/Brawler'
 import { GhostDuel } from './arcade/GhostDuel'
 import { Storm } from './arcade/Storm'
+import { CaptureInput } from './CaptureInput'
 import { loadBests, saveBest } from '../lib/bests'
 import type { Bests } from '../lib/bests'
+import { isTouchOnly } from '../lib/device'
 
 type GameId =
   | 'invaders'
@@ -189,13 +191,10 @@ export function Arcade({ onClose }: ArcadeProps) {
   const [game, setGame] = useState<GameId | null>(null)
   // localStorage read is synchronous + cheap → init directly at mount
   const [bests, setBests] = useState<Bests>(() => loadBests())
-  // touch-only devices have no hardware keyboard — warn once, nicely
-  const [coarse] = useState(
-    () =>
-      typeof window !== 'undefined' &&
-      window.matchMedia('(pointer: coarse)').matches &&
-      !window.matchMedia('(any-pointer: fine)').matches,
-  )
+  // touch-only devices have no hardware keyboard — the keypad port covers it
+  const [coarse] = useState(isTouchOnly)
+  // invisible keypad port inside the running cabinet
+  const gameKeypadRef = useRef<HTMLInputElement | null>(null)
 
   // stable reporter: reads the vault fresh instead of closing over `bests`,
   // so game handlers don't churn (which would reset in-game timers)
@@ -264,9 +263,9 @@ export function Arcade({ onClose }: ArcadeProps) {
             in the vault.
           </p>
           {coarse && (
-            <p className="mt-2 max-w-2xl border border-terminal-warning/50 bg-terminal-warning/5 px-2 py-1 font-mono text-[10px] leading-snug text-terminal-warning">
-              ⌨ touch screen detected — the cabinets are wired to a hardware
-              keyboard and need one to play.
+            <p className="mt-2 max-w-2xl border border-terminal-accent/40 bg-terminal-accent/5 px-2 py-1 font-mono text-[10px] leading-snug text-terminal-text-dim">
+              ⌁ touch screen detected — open a cabinet, tap the arena to raise
+              the keypad, and type as usual. every touch key plays.
             </p>
           )}
         </div>
@@ -282,21 +281,41 @@ export function Arcade({ onClose }: ArcadeProps) {
       )}
 
       {def && (
-        <div>
-          <div className="mb-2 flex items-center justify-between font-mono text-[10px] tracking-[0.25em] text-terminal-text-dim">
-            <span className="text-terminal-accent glow">{def.title}</span>
-            <button type="button" className="hover:text-terminal-text" onClick={() => setGame(null)}>
-              ◄ CABINET MENU
-            </button>
+        <div className="relative">
+          {/* keypad port: phone keyboards type into it, the diff becomes
+              synthetic keydowns that the cabinets already listen for */}
+          <CaptureInput mode="window" ref={gameKeypadRef} />
+          <div
+            onPointerDown={(e) => {
+              if (e.pointerType === 'touch') {
+                gameKeypadRef.current?.focus({ preventScroll: true })
+              }
+            }}
+          >
+            <div className="mb-2 flex items-center justify-between font-mono text-[10px] tracking-[0.25em] text-terminal-text-dim">
+              <span className="text-terminal-accent glow">{def.title}</span>
+              <button type="button" className="hover:text-terminal-text" onClick={() => setGame(null)}>
+                ◄ CABINET MENU
+              </button>
+            </div>
+            {def.id === 'invaders' && <Invaders onScore={handleInvaders} />}
+            {def.id === 'tracer' && <Tracer onResult={handleTracer} />}
+            {def.id === 'pulse' && <Reaction onScore={handlePulse} />}
+            {def.id === 'defuse' && <Defuse onScore={handleDefuse} />}
+            {def.id === 'chase' && <GhostChase onScore={handleChase} />}
+            {def.id === 'brawler' && <Brawler onScore={handleBrawler} />}
+            {def.id === 'duel' && <GhostDuel onResult={handleDuel} />}
+            {def.id === 'storm' && <Storm onScore={handleStorm} />}
           </div>
-          {def.id === 'invaders' && <Invaders onScore={handleInvaders} />}
-          {def.id === 'tracer' && <Tracer onResult={handleTracer} />}
-          {def.id === 'pulse' && <Reaction onScore={handlePulse} />}
-          {def.id === 'defuse' && <Defuse onScore={handleDefuse} />}
-          {def.id === 'chase' && <GhostChase onScore={handleChase} />}
-          {def.id === 'brawler' && <Brawler onScore={handleBrawler} />}
-          {def.id === 'duel' && <GhostDuel onResult={handleDuel} />}
-          {def.id === 'storm' && <Storm onScore={handleStorm} />}
+          {coarse && (
+            <button
+              type="button"
+              onClick={() => gameKeypadRef.current?.focus()}
+              className="mt-1 block w-full border border-terminal-border/60 bg-terminal-panel/40 px-2 py-1.5 text-center font-mono text-[10px] tracking-[0.25em] text-terminal-text-dim transition-colors hover:text-terminal-accent"
+            >
+              ⌨ TAP TO RAISE THE KEYPAD
+            </button>
+          )}
         </div>
       )}
     </div>

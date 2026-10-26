@@ -1,12 +1,15 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { HistoryView } from './components/History'
 import { LessonsView } from './components/Lessons'
 import { Arcade } from './components/Arcade'
+import { CaptureInput } from './components/CaptureInput'
 import { ModeBar } from './components/ModeBar'
 import { Results } from './components/Results'
 import { SystemHud } from './components/SystemHud'
 import { TypeTest } from './components/TypeTest'
 import { useTypingTest } from './hooks/useTypingTest'
+import { isTouchOnly } from './lib/device'
+import { isVirtualKey } from './lib/virtualKey'
 import { AtomWidget } from './components/dashboard/AtomWidget'
 import { BinaryStrip } from './components/dashboard/BinaryStrip'
 import { BinaryWall } from './components/dashboard/BinaryWall'
@@ -59,6 +62,20 @@ export default function App() {
   const [sound, setSound] = useState(() => loadSoundSetting())
   const [inputBlink, setInputBlink] = useState(false)
   const { state, press, restart, repeat } = useTypingTest(settings)
+  // no precise pointer → the invisible keypad port below is how typing works
+  const coarse = useMemo(() => isTouchOnly(), [])
+
+  const viewRef = useRef(view)
+  useEffect(() => {
+    viewRef.current = view
+  }, [view])
+
+  const captureRef = useRef<HTMLInputElement | null>(null)
+
+  // raise the on-screen keypad (touch flows) — stays scrolled with the console
+  const focusKeypad = useCallback(() => {
+    captureRef.current?.focus({ preventScroll: true })
+  }, [])
 
   // slow ambient heartbeat: keeps dials, tapes and jitter alive when idle
   const [heartbeat, setHeartbeat] = useState(0)
@@ -135,15 +152,40 @@ export default function App() {
     const onClick = (e: MouseEvent) => {
       const button = (e.target as HTMLElement | null)?.closest('button')
       if (button) button.blur()
+      // touch devices: keep the on-screen keypad raised across console
+      // taps (restart / next test / mode buttons), except on nav chrome
+      if (
+        coarse &&
+        viewRef.current === 'breach' &&
+        !button?.closest('header')
+      ) {
+        captureRef.current?.focus({ preventScroll: true })
+      }
     }
     window.addEventListener('click', onClick)
     return () => window.removeEventListener('click', onClick)
-  }, [])
+  }, [coarse])
+
+  // phone keypad → breach engine. the CaptureInput diff feeds one key at
+  // a time; state is a snapshot so multi-key bursts grade on stale typed
+  // data for sound only — the engine itself is fed sequentially and stays exact.
+  const handleVirtualKey = useCallback(
+    (key: string) => {
+      if (view !== 'breach' || state.finished) return
+      if (!focused && state.startedAt !== null) return
+      const feedback = keyFeedback(state, key)
+      press(key)
+      playKeySound(feedback)
+    },
+    [view, state, focused, press],
+  )
 
   // global keyboard handling — non-breach views leave keys to their owner
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return
+      // synthesized keypad events already went through the engine / games
+      if (isVirtualKey(e)) return
 
       if (view !== 'breach') {
         // running games own Escape while they capture the keyboard
@@ -332,8 +374,11 @@ export default function App() {
                       config={settings}
                       blurred={!focused}
                       onRestart={restart}
+                      onWordsTap={coarse ? focusKeypad : undefined}
                     />
                   )}
+                  {/* phone keypad port: tap the words to raise the keyboard */}
+                  <CaptureInput mode="engine" ref={captureRef} onKey={handleVirtualKey} />
                 </div>
               </div>
               <div className="relative z-10 border-t border-terminal-border/70">
@@ -343,8 +388,8 @@ export default function App() {
             <SystemHud state={state} config={settings} />
           </section>
 
-          {/* right instruments */}
-          <aside className="flex min-h-0 min-w-0 flex-col gap-1.5 lg:col-span-3">
+          {/* right instruments — decorative stack, desktop only */}
+          <aside className="hidden min-h-0 min-w-0 flex-col gap-1.5 lg:col-span-3 lg:flex">
             <div className="hidden sm:block">
               <BinaryStrip seed={21} height={16} />
             </div>
@@ -392,7 +437,7 @@ export default function App() {
         </div>
 
         {/* ── logic-board strip ──────────────────────────────────────── */}
-        <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="hidden gap-1.5 sm:grid sm:grid-cols-3 lg:grid-cols-5">
           {PCBS.map((name, i) => (
             <Win key={name} seed={40 + i} title={`${name}:${(i + 1) * 111}`} className="h-24 sm:h-28">
               <CircuitBoard seed={i + 2} />
@@ -446,8 +491,11 @@ export default function App() {
         </div>
       )}
 
-      <footer className="relative z-10 border-t border-terminal-border bg-terminal-bg/80 py-1.5 text-center font-mono text-[9px] tracking-[0.25em] text-terminal-text-dim">
-        GH0ST.OPS ▮ don't look at your keyboard ▮ tab restart · enter next · esc abort
+      <footer className="relative z-10 border-t border-terminal-border bg-terminal-bg/80 px-2 py-1.5 text-center font-mono text-[9px] tracking-[0.25em] text-terminal-text-dim">
+        GH0ST.OPS ▮ don't look at your keyboard ▮{' '}
+        {coarse
+          ? 'tap the words to raise the keypad · buttons restart'
+          : 'tab restart · enter next · esc abort'}
       </footer>
     </div>
   )

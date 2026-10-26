@@ -3,6 +3,7 @@ import { RotateCcw } from 'lucide-react'
 import type { ReactNode, RefObject } from 'react'
 import { liveStats } from '../lib/engine'
 import type { TestConfig, TestState } from '../lib/engine'
+import { isTouchOnly } from '../lib/device'
 
 /** word height (h-9 = 36px) + row gap (gap-y-3 = 12px) */
 const LINE_PITCH = 48
@@ -12,6 +13,8 @@ interface TypeTestProps {
   config: TestConfig
   blurred: boolean
   onRestart: () => void
+  /** touch screens: raise the invisible keypad port on tap */
+  onWordsTap?: () => void
 }
 
 function Word({
@@ -71,15 +74,10 @@ function Word({
   )
 }
 
-export function TypeTest({ state, config, blurred, onRestart }: TypeTestProps) {
+export function TypeTest({ state, config, blurred, onRestart, onWordsTap }: TypeTestProps) {
   const activeRef = useRef<HTMLDivElement | null>(null)
   const [offset, setOffset] = useState(0)
-  const [coarse] = useState(
-    () =>
-      typeof window !== 'undefined' &&
-      window.matchMedia('(pointer: coarse)').matches &&
-      !window.matchMedia('(any-pointer: fine)').matches,
-  )
+  const [coarse] = useState(isTouchOnly)
 
   // keep the active line centered: never scroll past the first visible line
   useLayoutEffect(() => {
@@ -120,7 +118,7 @@ export function TypeTest({ state, config, blurred, onRestart }: TypeTestProps) {
         </div>
         <button
           type="button"
-          className="btn-ghost px-2 py-1"
+          className="btn-ghost px-2.5 py-2 sm:px-2 sm:py-1"
           title="restart (esc)"
           onClick={onRestart}
         >
@@ -128,8 +126,17 @@ export function TypeTest({ state, config, blurred, onRestart }: TypeTestProps) {
         </button>
       </div>
 
-      {/* words area */}
-      <div className="relative select-none">
+      {/* words area — tapping it with a finger raises the keypad port */}
+      <div
+        className="relative select-none"
+        onPointerDown={
+          onWordsTap
+            ? (e) => {
+                if (e.pointerType === 'touch') onWordsTap()
+              }
+            : undefined
+        }
+      >
         <div className="relative h-36 overflow-hidden">
           <div
             className="flex flex-wrap content-start gap-x-3 gap-y-3 transition-transform duration-100"
@@ -151,7 +158,7 @@ export function TypeTest({ state, config, blurred, onRestart }: TypeTestProps) {
           <div className="pointer-events-none absolute inset-x-0 bottom-0 animate-fade-in text-center font-mono text-[10px] text-terminal-text-dim sm:text-xs">
             <span className="text-terminal-accent">&gt;</span>{' '}
             {coarse ? (
-              <span>touch screens can't fire keystrokes — open on a device with a keyboard</span>
+              <span>tap the text to raise the keypad — every touch key counts</span>
             ) : (
               <span>
                 type to initiate breach — tab aborts
@@ -162,7 +169,7 @@ export function TypeTest({ state, config, blurred, onRestart }: TypeTestProps) {
 
         {blurred && (
           <div className="absolute inset-0 z-10 grid animate-fade-in place-items-center bg-terminal-bg/80 font-mono text-sm text-terminal-text-dim backdrop-blur-sm">
-            focus lost — click to resume breach
+            {coarse ? 'focus lost — tap to resume breach' : 'focus lost — click to resume breach'}
           </div>
         )}
       </div>

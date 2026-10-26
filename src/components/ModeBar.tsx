@@ -27,7 +27,7 @@ function ModeButton({
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 font-mono text-xs transition-colors ${
+      className={`flex items-center gap-1.5 rounded-md px-2.5 py-2.5 font-mono text-xs transition-colors sm:py-1.5 ${
         active
           ? 'bg-terminal-panel text-terminal-accent'
           : 'text-terminal-text-dim hover:bg-terminal-panel hover:text-terminal-text'
@@ -52,7 +52,7 @@ function ValueButton({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-md px-2 py-1.5 font-mono text-xs tabular-nums transition-colors ${
+      className={`rounded-md px-2.5 py-2.5 font-mono text-xs tabular-nums transition-colors sm:px-2 sm:py-1.5 ${
         active
           ? 'bg-terminal-panel text-terminal-accent'
           : 'text-terminal-text-dim hover:bg-terminal-panel hover:text-terminal-text'
@@ -79,7 +79,7 @@ function ToggleButton({
       type="button"
       onClick={onClick}
       title={label}
-      className={`flex items-center gap-1 rounded-md border px-2 py-1 font-mono text-xs transition-colors ${
+      className={`flex items-center gap-1 rounded-md border px-2.5 py-2.5 font-mono text-xs transition-colors sm:px-2 sm:py-1 ${
         active
           ? 'border-terminal-accent/40 bg-terminal-panel text-terminal-accent'
           : 'border-transparent text-terminal-text-dim hover:text-terminal-text'

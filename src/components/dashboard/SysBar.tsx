@@ -93,7 +93,7 @@ export function SysBar({ view, onViewChange, sound, onToggleSound, status }: Sys
   }, [tick, status.breach, status.wpm, status.trace, status.running, sound, node, uptime])
 
   const navBtn = (item: (typeof NAV_ITEMS)[number]): string =>
-    `border px-1.5 py-1 font-mono text-[10px] tracking-[0.18em] transition-colors sm:px-2 ${
+    `border px-1.5 py-2.5 font-mono text-[10px] tracking-[0.18em] transition-colors sm:px-2 sm:py-1 ${
       view === item.id
         ? 'border-terminal-accent/60 bg-terminal-accent/15 text-terminal-accent glow'
         : 'border-terminal-border/70 text-terminal-text-dim hover:border-terminal-accent/40 hover:text-terminal-text'

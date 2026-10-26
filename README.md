@@ -1,167 +1,109 @@
-<div align="center">
+# ghost-terminal
 
-# Type Buddy
+A terminal-styled typing trainer with a hacker-ops dashboard. Type the words as
+fast and accurately as you can — every keystroke is graded live, every finished
+test is saved to your browser. Works with hardware keyboards **and with the
+on-screen keypad of phones and tablets**.
 
-### A terminal-inspired typing trainer for building speed, accuracy, and consistency.
+## Features
 
-<p>
-  <a href="https://typingbuddy.vercel.app/"><strong>Launch the live demo</strong></a>
-  &nbsp;&nbsp;·&nbsp;&nbsp;
-  <a href="https://github.com/Wrostdevil/Type-buddy">View the repository</a>
-</p>
+- **Time mode** — 15 / 30 / 60 / 120 second sprints with an endless word buffer
+- **Words mode** — 10 / 25 / 50 / 100 word tests
+- **Modifiers** — optional punctuation and numbers
+- **Lessons** — chaptered training curriculum: home row → reach keys → full
+  board → words → symbols → graduation exams; lessons unlock as targets are met
+- **Arcade** — eight keyboard-driven cabinets (Invaders, Tracer, Pulse-Key,
+  Defuse, Ghost Chase, Word Brawler, Ghost Duel, Letter Storm) with persistent
+  high scores
+- **Hacker dashboard theme** — phosphor-CRT look with scanlines, vignette and a
+  drifting CRT refresh band
+- **Live breach telemetry** — a HUD of system parameters that goes erratic
+  while you type
+- **Typewriter sound** — mechanical keystroke clacks synthesized live with the
+  Web Audio API; toggleable in the mode bar
+- **Live feedback** — per-character coloring, animated caret, live WPM & accuracy
+- **Results** — WPM/raw/accuracy/consistency plus a per-second WPM chart
+- **History** — every test saved to IndexedDB; trend chart, personal best and
+  average of your last 10 tests
+- **Settings persistence** — mode and modifier preferences are remembered
+  (localStorage)
 
-<p>
-  <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white" alt="React 19">
-  <img src="https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white" alt="TypeScript">
-  <img src="https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white" alt="Vite">
-  <img src="https://img.shields.io/badge/License-Not%20specified-lightgrey" alt="License">
-</p>
+## Keyboard & phone support
 
-</div>
+- **Desktop / hardware keyboard** — typing is captured globally: `tab`/`esc`
+  restart, `enter` for the next test; typing auto-pauses when the window loses
+  focus.
+- **Phone / tablet keypad** — tap the words to raise the on-screen keypad. An
+  invisible capture input takes the keypad's edits and diffs them into the
+  exact same keystroke stream the engine knows (including backspaces and
+  keypad autocorrect rewrites). Restart works with the on-screen buttons.
+- **Arcade on touch devices** — same plumbing: tap the arena to raise the
+  keypad and the cabinets play identically. Some cabinets are easier with a
+  hardware keyboard (symbol-heavy Defuse in particular), but every game is
+  playable.
 
-## Overview
+## Stack
 
-Type Buddy is a keyboard-first typing practice experience wrapped in a cinematic hacker-terminal interface. It provides timed and word-count tests, detailed performance analytics, lessons, arcade mini-games, synthesized typewriter sounds, and local history tracking — all without requiring an account or backend.
-
-**Try it now:** [typingbuddy.vercel.app](https://typingbuddy.vercel.app/)
-
-## Highlights
-
-- **Flexible practice** — 15, 30, 60, and 120-second tests or 10, 25, 50, and 100-word tests.
-- **Meaningful metrics** — live WPM, raw WPM, accuracy, consistency, per-second charts, personal bests, and recent averages.
-- **Focused learning** — lessons for targeted practice and progressive improvement.
-- **Arcade mode** — a collection of fast keyboard games, including Brawler, Defuse, Ghost Chase, Ghost Duel, Invaders, Reaction, Storm, and Tracer.
-- **Immersive interface** — CRT styling, scanlines, Matrix-inspired visuals, telemetry widgets, and an intrusion trace log.
-- **Responsive audio feedback** — Web Audio typewriter clicks, error sounds, spacebar thocks, and completion bells.
-- **Private by design** — test results stay in the browser through IndexedDB; preferences use localStorage.
-- **Keyboard-first controls** — `Tab`/`Esc` to restart, `Enter` for the next test, and automatic pause when the window loses focus.
-
-## Product flow
-
-```mermaid
-flowchart LR
-    A[Choose a mode] --> B[Configure duration or word count]
-    B --> C[Type the challenge]
-    C --> D[Live WPM and accuracy]
-    D --> E{Test complete?}
-    E -- No --> C
-    E -- Yes --> F[Results and WPM chart]
-    F --> G[(IndexedDB history)]
-    G --> H[Trends and personal bests]
-```
-
-## Architecture
-
-```mermaid
-flowchart TB
-    UI[React UI]
-    UI --> TEST[Typing test and lessons]
-    UI --> ARCADE[Arcade games]
-    UI --> DASH[Dashboard telemetry]
-
-    TEST --> HOOK[useTypingTest hook]
-    HOOK --> ENGINE[Typing engine]
-    ENGINE --> WORDS[Word and lesson generators]
-    ENGINE --> METRICS[WPM, accuracy, consistency]
-    ENGINE --> STORE[Browser storage]
-
-    STORE --> IDB[(IndexedDB)]
-    STORE --> PREFS[(localStorage)]
-    UI --> CHARTS[Recharts visualizations]
-    UI --> SOUND[Web Audio feedback]
-```
-
-## Deployment
-
-The production build is deployed on Vercel and served as a static Vite application.
-
-```mermaid
-flowchart LR
-    DEV[Developer] -->|git push| GH[GitHub: Type-buddy]
-    GH -->|automatic deployment| VERCEL[Vercel]
-    VERCEL --> BUILD[npm run build]
-    BUILD --> APP[typingbuddy.vercel.app]
-    USER[Browser] --> APP
-    APP --> LOCAL[(Local IndexedDB)]
-```
-
-## Technology
-
-- [React 19](https://react.dev/) and [TypeScript](https://www.typescriptlang.org/)
-- [Vite](https://vite.dev/) for development and production builds
-- [Tailwind CSS](https://tailwindcss.com/) with a custom terminal theme
-- [Recharts](https://recharts.org/) for results and history charts
-- [idb](https://github.com/jakearchibald/idb) for IndexedDB persistence
-- [Vitest](https://vitest.dev/) for engine and word-generation tests
-- Web Audio API for synthesized typing feedback
+- [React 19](https://react.dev) + [TypeScript](https://www.typescriptlang.org)
+- [Vite](https://vite.dev) for dev server & builds
+- [Tailwind CSS](https://tailwindcss.com) with a custom terminal theme
+- [Recharts](https://recharts.org) for the results/history charts
+- [idb](https://github.com/jakearchibald/idb) (IndexedDB) for result storage
+- [Vitest](https://vitest.dev) for the core engine tests
 
 ## Getting started
 
-### Prerequisites
-
-- Node.js 20 or newer
-- npm 10 or newer
-
-### Installation
-
 ```bash
-git clone https://github.com/Wrostdevil/Type-buddy.git
-cd Type-buddy
 npm install
-```
-
-### Start the development server
-
-```bash
-npm run dev
-```
-
-Open the local URL printed by Vite, usually `http://localhost:5173`.
-
-### Production preview
-
-```bash
-npm run build
-npm run preview
+npm run dev      # start the dev server
 ```
 
 ## Scripts
 
-| Command | Purpose |
-| --- | --- |
-| `npm run dev` | Start the Vite development server |
-| `npm run build` | Type-check and create the production build |
-| `npm run preview` | Preview the production build locally |
-| `npm run test` | Run the unit test suite once |
-| `npm run test:watch` | Run tests in watch mode |
-| `npm run lint` | Run Oxlint |
+| Script             | Description                        |
+| ------------------ | ---------------------------------- |
+| `npm run dev`      | Start the Vite dev server          |
+| `npm run build`    | Type-check and build for production|
+| `npm run preview`  | Preview the production build       |
+| `npm run test`     | Run unit tests once                |
+| `npm run test:watch` | Run unit tests in watch mode     |
+| `npm run lint`     | Lint with oxlint                   |
 
 ## Project structure
 
-```text
+```
 src/
-├── components/          React screens and reusable UI
-│   ├── arcade/          Keyboard arcade mini-games
-│   └── dashboard/       Terminal dashboard widgets
-├── hooks/               React bindings for application state
-├── lib/                 Typing engine, words, lessons, sound, and storage
-├── App.tsx              Application composition and navigation
-├── index.css            Global styles and terminal theme
-└── main.tsx             Application entry point
+  lib/
+    words.ts            word pool + test-word generator
+    engine.ts           typing state machine, metrics, results
+    sound.ts            Web Audio typewriter sounds (clack, error, bell)
+    storage.ts          IndexedDB history + settings persistence
+    device.ts           touch-only device sniffing
+    virtualKey.ts       keypad diff → keystrokes, synthetic key events
+    lessons.ts          lesson/chapter curriculum + drills
+    bests.ts            persistent personal bests (lessons + arcade)
+  hooks/
+    useTypingTest.ts    React binding for the engine
+  components/
+    CaptureInput.tsx    invisible phone-keypad port (diff source of truth)
+    ModeBar.tsx         mode/duration/modifier selection
+    TypeTest.tsx        words area, caret, live stats
+    Results.tsx         finished-test stats + chart
+    History.tsx         history table, trend chart, personal best
+    Lessons.tsx         training curriculum takeover
+    Arcade.tsx          arcade hall + cabinet host
+    Header.tsx          brand + view navigation
+    Footer.tsx          shortcuts
+    SystemHud.tsx       fake system telemetry strip
+  components/dashboard/ window widgets (gauges, maps, ledger, CCTV …)
+  components/arcade/    the eight arcade cabinets
+  App.tsx               composition + global keyboard handling
+
 ```
 
-## Data and privacy
+## Notes
 
-Type Buddy does not need a server, account, API key, or external database. Completed tests are stored locally in the browser using IndexedDB, while mode and modifier preferences are stored in localStorage. Clearing browser site data removes the saved history and settings.
-
-## Contributing
-
-1. Fork the repository.
-2. Create a feature branch: `git checkout -b feature/my-improvement`
-3. Install dependencies and make your changes.
-4. Run `npm run lint`, `npm run test`, and `npm run build`.
-5. Open a pull request with a concise description of the change.
-
-## License
-
-No open-source license has been specified for this project. Contact the repository owner before redistributing or reusing the source.
+- Results are stored locally in your browser (IndexedDB). Clearing site data
+  clears your history and settings.
+- The responsive layout collapses the dashboard to the essentials on small
+  screens (console + HUD first), so the typing area is front and center.

@@ -24,10 +24,11 @@
     color: #dbffe3;
   }
 
-  /* touch: kill tap flash, keep visual focus feedback instead */
+  /* touch: kill tap flash + double-tap zoom delay, keep visual focus instead */
   @media (pointer: coarse) {
     button, kbd, a {
       -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
   }
 

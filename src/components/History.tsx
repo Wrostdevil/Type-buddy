@@ -142,14 +142,14 @@ export function HistoryView({ history, onClear }: HistoryViewProps) {
             <table className="w-full font-mono text-sm">
               <thead>
                 <tr className="border-b border-terminal-border text-left text-xs uppercase tracking-wider text-terminal-text-dim">
-                  <th className="px-4 py-2.5 font-normal">date</th>
-                  <th className="px-4 py-2.5 font-normal">test</th>
-                  <th className="px-4 py-2.5 text-right font-normal">wpm</th>
-                  <th className="px-4 py-2.5 text-right font-normal">acc</th>
-                  <th className="hidden px-4 py-2.5 text-right font-normal sm:table-cell">
+                  <th className="px-2.5 py-2.5 font-normal sm:px-4">date</th>
+                  <th className="px-2.5 py-2.5 font-normal sm:px-4">test</th>
+                  <th className="px-2.5 py-2.5 text-right font-normal sm:px-4">wpm</th>
+                  <th className="px-2.5 py-2.5 text-right font-normal sm:px-4">acc</th>
+                  <th className="hidden px-2.5 py-2.5 text-right font-normal sm:table-cell sm:px-4">
                     raw
                   </th>
-                  <th className="hidden px-4 py-2.5 text-right font-normal sm:table-cell">
+                  <th className="hidden px-2.5 py-2.5 text-right font-normal sm:table-cell sm:px-4">
                     consistency
                   </th>
                 </tr>
@@ -160,20 +160,20 @@ export function HistoryView({ history, onClear }: HistoryViewProps) {
                     key={r.id}
                     className="border-b border-terminal-border/50 text-terminal-text last:border-0 hover:bg-terminal-panel/60"
                   >
-                    <td className="whitespace-nowrap px-4 py-2 text-xs text-terminal-text-dim">
+                    <td className="whitespace-nowrap px-2.5 py-2 text-xs text-terminal-text-dim sm:px-4">
                       {new Date(r.date).toLocaleString()}
                     </td>
-                    <td className="whitespace-nowrap px-4 py-2 text-xs">
+                    <td className="whitespace-nowrap px-2.5 py-2 text-xs sm:px-4">
                       {resultLabel(r)}
                     </td>
-                    <td className="px-4 py-2 text-right tabular-nums text-terminal-accent">
+                    <td className="px-2.5 py-2 text-right tabular-nums text-terminal-accent sm:px-4">
                       {Math.round(r.wpm)}
                     </td>
-                    <td className="px-4 py-2 text-right tabular-nums">{r.accuracy}%</td>
-                    <td className="hidden px-4 py-2 text-right tabular-nums sm:table-cell">
+                    <td className="px-2.5 py-2 text-right tabular-nums sm:px-4">{r.accuracy}%</td>
+                    <td className="hidden px-2.5 py-2 text-right tabular-nums sm:table-cell sm:px-4">
                       {Math.round(r.raw)}
                     </td>
-                    <td className="hidden px-4 py-2 text-right tabular-nums sm:table-cell">
+                    <td className="hidden px-2.5 py-2 text-right tabular-nums sm:table-cell sm:px-4">
                       {r.consistency}%
                     </td>
                   </tr>

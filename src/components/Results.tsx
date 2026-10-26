@@ -38,13 +38,13 @@ export function Results({ result, onNext, onRepeat }: ResultsProps) {
 
   return (
     <div className="animate-slide-up">
-      <div className="flex flex-col gap-6 md:flex-row md:items-center">
-        <div className="flex shrink-0 gap-8">
+      <div className="flex flex-col gap-5 md:flex-row md:items-center sm:gap-6">
+        <div className="flex shrink-0 gap-6 sm:gap-8">
           <div>
             <div className="font-mono text-xs uppercase tracking-wider text-terminal-text-dim">
               wpm
             </div>
-            <div className="font-mono text-5xl font-bold tabular-nums text-terminal-accent">
+            <div className="font-mono text-4xl font-bold tabular-nums text-terminal-accent sm:text-5xl">
               {Math.round(result.wpm)}
             </div>
           </div>
@@ -52,9 +52,9 @@ export function Results({ result, onNext, onRepeat }: ResultsProps) {
             <div className="font-mono text-xs uppercase tracking-wider text-terminal-text-dim">
               accuracy
             </div>
-            <div className="font-mono text-5xl font-bold tabular-nums text-terminal-text">
+            <div className="font-mono text-4xl font-bold tabular-nums text-terminal-text sm:text-5xl">
               {result.accuracy}
-              <span className="text-2xl text-terminal-text-dim">%</span>
+              <span className="text-xl text-terminal-text-dim sm:text-2xl">%</span>
             </div>
           </div>
         </div>
